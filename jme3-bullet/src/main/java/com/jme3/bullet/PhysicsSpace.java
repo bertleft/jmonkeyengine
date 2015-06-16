@@ -898,7 +898,7 @@ public class PhysicsSpace {
     * 
     * @param spaceId 
     */
-    public void setSpaceId(long spaceId) {
+    protected void setSpaceId(long spaceId) {
         physicsSpaceId = spaceId;
     }
 
