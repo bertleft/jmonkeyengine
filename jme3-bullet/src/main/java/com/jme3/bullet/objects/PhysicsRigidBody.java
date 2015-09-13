@@ -626,10 +626,17 @@ public class PhysicsRigidBody extends PhysicsCollisionObject {
 
     private native float getAngularSleepingThreshold(long objectId);
 
-    public Vector3f getAngularFactor() {
-        Vector3f vec = new Vector3f();
-        getAngularFactor(objectId, vec);
-	return vec;
+    public float getAngularFactor() {
+        return getAngularFactor(null).getX();
+    }
+
+    public Vector3f getAngularFactor(Vector3f store) {
+        // doing like this prevent from breaking the API
+        if (store == null) {
+            store = new Vector3f();
+        }
+        getAngularFactor(objectId, store);
+        return store;
     }
 
     private native void getAngularFactor(long objectId, Vector3f vec);
@@ -694,8 +701,13 @@ public class PhysicsRigidBody extends PhysicsCollisionObject {
         capsule.write(getGravity(), "gravity", Vector3f.ZERO);
         capsule.write(getFriction(), "friction", 0.5f);
         capsule.write(getRestitution(), "restitution", 0);
-        capsule.write(getAngularFactor(), "angularFactor", Vector3f.UNIT_XYZ);
-        capsule.write(getLinearFactor(), "linearFactor", Vector3f.UNIT_XYZ);
+        Vector3f angularFactor = getAngularFactor(null);
+        if (angularFactor.x == angularFactor.y && angularFactor.y == angularFactor.z) {
+            capsule.write(getAngularFactor(), "angularFactor", 1);
+        } else {
+            capsule.write(getAngularFactor(null), "angularFactor", Vector3f.UNIT_XYZ);
+            capsule.write(getLinearFactor(), "linearFactor", Vector3f.UNIT_XYZ);
+        }
         capsule.write(kinematic, "kinematic", false);
 
         capsule.write(getLinearDamping(), "linearDamping", 0);
@@ -725,8 +737,13 @@ public class PhysicsRigidBody extends PhysicsCollisionObject {
         setKinematic(capsule.readBoolean("kinematic", false));
 
         setRestitution(capsule.readFloat("restitution", 0));
-        setAngularFactor((Vector3f) capsule.readSavable("angularFactor", Vector3f.UNIT_XYZ.clone()));
-        setLinearFactor((Vector3f) capsule.readSavable("linearFactor", Vector3f.UNIT_XYZ.clone()));
+        Vector3f angularFactor = (Vector3f) capsule.readSavable("angularFactor", Vector3f.NAN.clone());
+        if(angularFactor == Vector3f.NAN) {
+            setAngularFactor(capsule.readFloat("angularFactor", 1));
+        } else {
+            setAngularFactor(angularFactor);
+            setLinearFactor((Vector3f) capsule.readSavable("linearFactor", Vector3f.UNIT_XYZ.clone()));
+        }
         setDamping(capsule.readFloat("linearDamping", 0), capsule.readFloat("angularDamping", 0));
         setSleepingThresholds(capsule.readFloat("linearSleepingThreshold", 0.8f), capsule.readFloat("angularSleepingThreshold", 1.0f));
         setCcdMotionThreshold(capsule.readFloat("ccdMotionThreshold", 0));
