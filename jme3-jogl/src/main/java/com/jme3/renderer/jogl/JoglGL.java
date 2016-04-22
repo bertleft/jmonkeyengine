@@ -79,6 +79,11 @@ public class JoglGL implements GL, GL2, GL3, GL4 {
     }
 
     @Override
+    public void glBlendEquationSeparate(int colorMode, int alphaMode){
+        GLContext.getCurrentGL().glBlendEquationSeparate(colorMode, alphaMode);
+    }
+
+    @Override
 	public void glBlendFunc(int param1, int param2) {
         GLContext.getCurrentGL().glBlendFunc(param1, param2);
     }
@@ -599,5 +604,10 @@ public class JoglGL implements GL, GL2, GL3, GL4 {
 	public void glDeleteVertexArrays(IntBuffer arrays) {
         checkLimit(arrays);
         GLContext.getCurrentGL().getGL2ES3().glDeleteVertexArrays(arrays.limit(), arrays);
+    }
+
+    @Override
+    public void glFramebufferTextureLayer(int param1, int param2, int param3, int param4, int param5) {
+        GLContext.getCurrentGL().getGL3().glFramebufferTextureLayer(param1, param2, param3, param4, param5);
     }
 }

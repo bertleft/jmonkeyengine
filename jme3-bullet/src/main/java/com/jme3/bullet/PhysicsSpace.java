@@ -333,6 +333,21 @@ public class PhysicsSpace {
 //        System.out.println("addCollisionEvent:"+node.getObjectId()+" "+ node1.getObjectId());
         collisionEvents.add(eventFactory.getEvent(PhysicsCollisionEvent.TYPE_PROCESSED, node, node1, manifoldPointObjectId));
     }
+    
+    private boolean notifyCollisionGroupListeners_native(PhysicsCollisionObject node, PhysicsCollisionObject node1){
+        PhysicsCollisionGroupListener listener = collisionGroupListeners.get(node.getCollisionGroup());
+        PhysicsCollisionGroupListener listener1 = collisionGroupListeners.get(node1.getCollisionGroup());
+        boolean result = true;
+        
+        if(listener != null){
+            result = listener.collide(node, node1);
+        }
+        if(listener1 != null && node.getCollisionGroup() != node1.getCollisionGroup()){
+            result = listener1.collide(node, node1) && result;
+        }
+        
+        return result;
+    }
 
     /**
      * updates the physics space
@@ -985,7 +1000,7 @@ public class PhysicsSpace {
         return solverNumIterations;
     }
     
-    private static native void setSolverNumIterations(long physicsSpaceId, int numIterations);
+    private native void setSolverNumIterations(long physicsSpaceId, int numIterations);
     
     public static native void initNativePhysics();
 
