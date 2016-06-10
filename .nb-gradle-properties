@@ -6,4 +6,17 @@
     <template>license.txt</template>
     <property name="organization">jMonkeyEngine</property>
   </license-header>
+  <built-in-tasks>
+    <task>
+      <display-name>build</display-name>
+      <non-blocking>yes</non-blocking>
+      <task-names>
+        <name must-exist="no">build</name>
+        <name must-exist="no">libDist</name>
+        <name must-exist="no">copyLibs</name>
+      </task-names>
+      <task-args/>
+      <task-jvm-args/>
+    </task>
+  </built-in-tasks>
 </gradle-project-properties>

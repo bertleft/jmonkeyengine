@@ -170,9 +170,11 @@ unzipBullet.dependsOn {
 
 compileJava.dependsOn {
     if(buildNativeProjects=="true"){
-        def bulletUnzipDir = new File(project.projectDir.absolutePath + File.separator + bulletFolder)
-        if (!bulletUnzipDir.isDirectory()) {
-            unzipBullet
+        if(bulletZipFile!="ignore"){
+            def bulletUnzipDir = new File(project.projectDir.absolutePath + File.separator + bulletFolder)
+            if (!bulletUnzipDir.isDirectory()) {
+                unzipBullet
+            }
         }
     }
 }
