@@ -17,6 +17,8 @@ import com.jme3.math.Spline;
 import com.jme3.math.Spline.SplineType;
 import com.jme3.math.Vector3f;
 import com.jme3.math.Vector4f;
+import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
 import com.jme3.scene.VertexBuffer.Type;
 import com.jme3.scene.mesh.IndexBuffer;
 import com.jme3.scene.plugins.blender.BlenderContext;
@@ -66,6 +68,8 @@ public class CurvesTemporalMesh extends TemporalMesh {
     protected CurvesTemporalMesh taperObject;
     /** The scale that is used if the curve is a bevel or taper curve. */
     protected Vector3f           scale          = new Vector3f(1, 1, 1);
+    
+    protected List<Surface>      nurbSurfaces;
 
     /**
      * The constructor creates an empty temporal mesh.
@@ -352,6 +356,10 @@ public class CurvesTemporalMesh extends TemporalMesh {
             int uSegments = resolu * controlPoints.get(0).size() - 1;
             int vSegments = resolv * controlPoints.size() - 1;
             Surface nurbSurface = Surface.createNurbsSurface(controlPoints, knots, uSegments, vSegments, orderU, orderV, smooth);
+            if (nurbSurfaces == null) {
+                nurbSurfaces = new ArrayList<Surface>();
+            }
+            nurbSurfaces.add(nurbSurface);
 
             FloatBuffer vertsBuffer = (FloatBuffer) nurbSurface.getBuffer(Type.Position).getData();
             vertices.addAll(Arrays.asList(BufferUtils.getVector3Array(vertsBuffer)));
@@ -885,6 +893,20 @@ public class CurvesTemporalMesh extends TemporalMesh {
          */
         public boolean isCyclic() {
             return cyclic;
+        }
+    }
+
+    @Override
+    public void toGeometries() {
+        Node oldParent = getParent();
+        super.toGeometries();
+        if ((oldParent != null) && (nurbSurfaces != null) && (nurbSurfaces.size() == oldParent.getChildren().size())) {
+            for (int i =0; i < nurbSurfaces.size(); ++i) {
+                Spatial spatial = oldParent.getChild(i);
+                if (spatial.getUserData("jmeKeepNurbSurface") != null) {
+                    oldParent.getChild(i).setUserData("jmeNurbSurface", nurbSurfaces.get(i));
+                }
+            }
         }
     }
 }
