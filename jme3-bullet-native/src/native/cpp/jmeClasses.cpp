@@ -107,6 +107,10 @@ jclass jmeClasses::Transform;
 jmethodID jmeClasses::Transform_rotation;
 jmethodID jmeClasses::Transform_translation;
 
+jclass jmeClasses::BulletDebugCallback;
+jmethodID jmeClasses::BulletDebugCallback_callbackFromBullet;
+
+
 //private fields
 //JNIEnv* jmeClasses::env;
 JavaVM* jmeClasses::vm;
@@ -321,6 +325,16 @@ void jmeClasses::initJavaClasses(JNIEnv* env) {
 		return;
 	}
 
+
+    BulletDebugCallback = (jclass)env->NewGlobalRef(env->FindClass("com/jme3/bullet/debug/BulletDebugCallback"));
+	if (env->ExceptionCheck()) {
+		env->Throw(env->ExceptionOccurred());
+		return;
+	}
+    BulletDebugCallback_callbackFromBullet = env->GetMethodID(BulletDebugCallback, "callbackFromBullet", "(ILjava/lang/Object;Z)V");
+
+    fprintf(stdout, "Bullet-Native: Java classes initialized\n");
+    fflush(stdout);
 }
 
 void jmeClasses::throwNPE(JNIEnv* env) {

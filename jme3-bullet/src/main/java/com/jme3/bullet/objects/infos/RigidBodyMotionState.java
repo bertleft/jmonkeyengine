@@ -31,6 +31,7 @@
  */
 package com.jme3.bullet.objects.infos;
 
+import com.jme3.bullet.debug.BulletDebugCallback;
 import com.jme3.bullet.objects.PhysicsVehicle;
 import com.jme3.math.Matrix3f;
 import com.jme3.math.Quaternion;
@@ -52,6 +53,17 @@ public class RigidBodyMotionState {
     private Quaternion tmp_inverseWorldRotation = new Quaternion();
     private PhysicsVehicle vehicle;
     private boolean applyPhysicsLocal = false;
+    
+    private Vector3f linearVelocity = new Vector3f();
+    private Vector3f angularVelocity = new Vector3f();
+    private Vector3f linearImpulse = new Vector3f();
+    private Vector3f angularImpulse = new Vector3f();
+    private Vector3f totalForce = new Vector3f();
+    private Vector3f totalTorque = new Vector3f();
+    private Float appliedLinearDamping = 0.f;
+    private Float appliedAngularDamping = 0.f;
+    private int lastUpdateId;
+    
 //    protected LinkedList<PhysicsMotionStateListener> listeners = new LinkedList<PhysicsMotionStateListener>();
 
     public RigidBodyMotionState() {
@@ -125,6 +137,50 @@ public class RigidBodyMotionState {
     }
 
     private native void getWorldRotationQuat(long stateId, Quaternion vec);
+    
+    
+    public Vector3f getLinearVelocity() {
+        updateVelocityInfo();
+        return linearVelocity;
+    }
+    public Vector3f getAngularVelocity() {
+        updateVelocityInfo();
+        return angularVelocity;
+    }
+    public Vector3f getLinearImpulse() {
+        updateVelocityInfo();
+        return linearImpulse;
+    }
+    public Vector3f getAngularImpulse() {
+        updateVelocityInfo();
+        return angularImpulse;
+    }
+    public Vector3f getTotalForce() {
+        updateVelocityInfo();
+        return totalForce;
+    }
+    public Vector3f getTotalTorque() {
+        updateVelocityInfo();
+        return totalTorque;
+    }
+    public float getAppliedLinearDamping() {
+        updateVelocityInfo();
+        return appliedLinearDamping;
+    }
+    public float getAppliedAngularDamping() {
+        updateVelocityInfo();
+        return appliedAngularDamping;
+    }
+    
+    private void updateVelocityInfo() {
+        lastUpdateId = updateVelocityInfo(motionStateId, linearVelocity, angularVelocity,
+            linearImpulse, angularImpulse, totalForce, totalTorque,
+            appliedLinearDamping, appliedAngularDamping, lastUpdateId);
+    }
+    private native int updateVelocityInfo(long stateId, Vector3f linearVel, Vector3f angularVel,
+            Vector3f linearImpulse, Vector3f angularImpulse, Vector3f totalForce, Vector3f totalTorque,
+            Float appliedLinearDamping, Float appliedAngularDamping, int lastUpdateId);
+    
 
     /**
      * @param vehicle the vehicle to set
@@ -160,4 +216,11 @@ public class RigidBodyMotionState {
     }
 
     private native void finalizeNative(long objectId);
+    
+    
+    public void setDebugCallback(BulletDebugCallback debugCallback) {
+        setDebugCallback(motionStateId, debugCallback);
+    }
+    
+    private native void setDebugCallback(long stateId, BulletDebugCallback debugCallbac);
 }

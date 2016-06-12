@@ -104,7 +104,10 @@ public:
 
     static jclass DebugMeshCallback;
     static jmethodID DebugMeshCallback_addVector;
-
+    
+    static jclass BulletDebugCallback;
+    static jmethodID BulletDebugCallback_callbackFromBullet;
+    
     static void throwNPE(JNIEnv* env);
 private:
     jmeClasses(){};

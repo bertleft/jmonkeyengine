@@ -49,11 +49,27 @@ JNIEXPORT void JNICALL Java_com_jme3_bullet_objects_infos_RigidBodyMotionState_g
 
 /*
  * Class:     com_jme3_bullet_objects_infos_RigidBodyMotionState
+ * Method:    updateVelocityInfo
+ * Signature: (JLcom/jme3/math/Vector3f;Lcom/jme3/math/Vector3f;Lcom/jme3/math/Vector3f;Lcom/jme3/math/Vector3f;Lcom/jme3/math/Vector3f;Lcom/jme3/math/Vector3f;Ljava/lang/Float;Ljava/lang/Float;I)I
+ */
+JNIEXPORT jint JNICALL Java_com_jme3_bullet_objects_infos_RigidBodyMotionState_updateVelocityInfo
+  (JNIEnv *, jobject, jlong, jobject, jobject, jobject, jobject, jobject, jobject, jobject, jobject, jint);
+
+/*
+ * Class:     com_jme3_bullet_objects_infos_RigidBodyMotionState
  * Method:    finalizeNative
  * Signature: (J)V
  */
 JNIEXPORT void JNICALL Java_com_jme3_bullet_objects_infos_RigidBodyMotionState_finalizeNative
   (JNIEnv *, jobject, jlong);
+
+/*
+ * Class:     com_jme3_bullet_objects_infos_RigidBodyMotionState
+ * Method:    setDebugCallback
+ * Signature: (JLcom/jme3/bullet/debug/BulletDebugCallback;)V
+ */
+JNIEXPORT void JNICALL Java_com_jme3_bullet_objects_infos_RigidBodyMotionState_setDebugCallback
+  (JNIEnv *, jobject, jlong, jobject);
 
 #ifdef __cplusplus
 }

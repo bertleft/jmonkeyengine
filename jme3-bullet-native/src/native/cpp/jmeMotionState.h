@@ -38,13 +38,30 @@
 #include "btBulletDynamicsCommon.h"
 //#include "btBulletCollisionCommon.h"
 
+class jmeDebugCallback;
+
 class jmeMotionState : public btMotionState {
 private:
     bool dirty;
     btTransform* trans;
+    
+    btVector3 linearVel;
+    btVector3 angularVel;
+    btVector3 linearImpulse;
+    btVector3 angularImpulse;
+    btVector3 totalForce;
+    btVector3 totalTorque;
+    btScalar appliedLinearDamping;
+    btScalar appliedAngularDamping;
+    
+    int updateId;
+    
+    jmeDebugCallback * debugCallback;
 public:
     jmeMotionState();
     virtual ~jmeMotionState();
+    
+    void setDebugCallback(jmeDebugCallback * callback);
 
     btTransform worldTransform;
     virtual void getWorldTransform(btTransform& worldTrans) const;
@@ -54,4 +71,20 @@ public:
     void setKinematicRotation(JNIEnv*, jobject);
     void setKinematicRotationQuat(JNIEnv*, jobject);
     bool applyTransform(JNIEnv* env, jobject location, jobject rotation);
+    
+    
+    virtual void setLinearVelocity(const btVector3 & vel, const btVector3 * cause, btScalar tStep);
+    virtual void setAngularVelocity(const btVector3 & vel, const btVector3 * cause, btScalar tStep);
+    virtual void forcesCleared();
+
+    const btVector3 & getLinearVelocity() const { return linearVel; }
+    const btVector3 & getAngularVelocity() const { return angularVel; }
+    const btVector3 & getLinearImpulse() const { return linearImpulse; }
+    const btVector3 & getAngularImpulse() const { return angularImpulse; }
+    const btVector3 & getTotalForce() const { return totalForce; }
+    const btVector3 & getTotalTorque() const { return totalTorque; }
+    const btScalar getAppliedLinearDamping() const { return appliedLinearDamping; }
+    const btScalar getAppliedAngularDamping() const { return appliedAngularDamping; }
+    
+    int getUpdateId() const { return updateId; }
 };

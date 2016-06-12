@@ -31,6 +31,7 @@
  */
 #include "jmeMotionState.h"
 #include "jmeBulletUtil.h"
+#include "jmeDebugCallback.h"
 
 /**
  * Author: Normen Hansen
@@ -40,7 +41,20 @@ jmeMotionState::jmeMotionState() {
     trans = new btTransform();
     trans -> setIdentity();
     worldTransform = *trans;
+    appliedLinearDamping = 0;
+    appliedAngularDamping = 0;
+    updateId = 0;
+    debugCallback = 0;
     dirty = true;
+}
+
+void jmeMotionState::setDebugCallback(jmeDebugCallback * callback) {
+    if (callback != debugCallback) {
+        if (debugCallback) {
+            delete debugCallback;
+        }
+        debugCallback = callback;
+    }
 }
 
 void jmeMotionState::getWorldTransform(btTransform& worldTrans) const {
@@ -48,8 +62,10 @@ void jmeMotionState::getWorldTransform(btTransform& worldTrans) const {
 }
 
 void jmeMotionState::setWorldTransform(const btTransform& worldTrans) {
+    jmeDebugCallback::callbackFromBullet(debugCallback, jmeDebugCallback::RIGID_BODY_MOTION_STATE_SET_WORLD_TRANSFORM, true);
     worldTransform = worldTrans;
     dirty = true;
+    jmeDebugCallback::callbackFromBullet(debugCallback, jmeDebugCallback::RIGID_BODY_MOTION_STATE_SET_WORLD_TRANSFORM, false);
 }
 
 void jmeMotionState::setKinematicTransform(const btTransform& worldTrans) {
@@ -86,4 +102,73 @@ bool jmeMotionState::applyTransform(JNIEnv* env, jobject location, jobject rotat
 
 jmeMotionState::~jmeMotionState() {
     free(trans);
+    setDebugCallback(0);
+}
+
+void jmeMotionState::setLinearVelocity(const btVector3 & vel, const btVector3 * cause, btScalar tStep) {
+    int reason;
+    appliedLinearDamping = 0;
+    if (cause) {
+        if (tStep > 0) {
+            totalForce = *cause;
+            reason = jmeDebugCallback::RIGID_BODY_INTEGRATE_LINEAR_VELOCITY;
+        }
+        else {
+            linearImpulse = *cause;
+            reason = jmeDebugCallback::RIGID_BODY_APPLY_LINEAR_IMPULSE;
+        }
+    }
+    else {
+        if (tStep != 0) {
+            appliedLinearDamping = tStep;
+            reason = jmeDebugCallback::RIGID_BODY_DAMP_LINEAR_VELOCITY;
+        }
+        else {
+            reason = jmeDebugCallback::RIGID_BODY_SET_LINEAR_VELOCITY;
+        }
+    }
+    jmeDebugCallback::callbackFromBullet(debugCallback, reason, true);
+    ++updateId;
+    linearVel = vel;
+    jmeDebugCallback::callbackFromBullet(debugCallback, reason, false);
+}
+
+void jmeMotionState::setAngularVelocity(const btVector3 & vel, const btVector3 * cause, btScalar tStep) {
+    int reason;
+    appliedAngularDamping = 0;
+    if (cause) {
+        if (tStep > 0) {
+            totalTorque = *cause;
+            reason = jmeDebugCallback::RIGID_BODY_INTEGRATE_ANGULAR_VELOCITY;
+        }
+        else {
+            angularImpulse = *cause;
+            reason = jmeDebugCallback::RIGID_BODY_APPLY_ANGULAR_IMPULSE;
+        }
+    }
+    else {
+        if (tStep != 0) {
+            appliedAngularDamping = tStep;
+            reason = jmeDebugCallback::RIGID_BODY_DAMP_ANGULAR_VELOCITY;
+        }
+        else {
+            reason = jmeDebugCallback::RIGID_BODY_SET_ANGULAR_VELOCITY;
+        }
+    }
+    jmeDebugCallback::callbackFromBullet(debugCallback, reason, true);
+    ++updateId;
+    angularVel = vel;
+    jmeDebugCallback::callbackFromBullet(debugCallback, reason, false);
+}
+
+void jmeMotionState::forcesCleared() {
+    jmeDebugCallback::callbackFromBullet(debugCallback, jmeDebugCallback::RIGID_BODY_FORCES_CLEARED, true);
+
+    ++updateId;
+    totalForce.setZero();
+    totalTorque.setZero();
+    appliedLinearDamping = 0;
+    appliedAngularDamping = 0;
+
+    jmeDebugCallback::callbackFromBullet(debugCallback, jmeDebugCallback::RIGID_BODY_FORCES_CLEARED, false);
 }

@@ -36,6 +36,7 @@
 #include "com_jme3_bullet_objects_infos_RigidBodyMotionState.h"
 #include "jmeBulletUtil.h"
 #include "jmeMotionState.h"
+#include "jmeDebugCallback.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -117,6 +118,39 @@ extern "C" {
         jmeBulletUtil::convertQuat(env, &motionState->worldTransform.getBasis(), value);
     }
 
+
+    /*
+     * Class:     com_jme3_bullet_objects_infos_RigidBodyMotionState
+     * Method:    updateVelocityInfo
+     * Signature: (JLcom/jme3/math/Vector3f;Lcom/jme3/math/Vector3f;Lcom/jme3/math/Vector3f;Lcom/jme3/math/Vector3f;Lcom/jme3/math/Vector3f;Lcom/jme3/math/Vector3f;Ljava/lang/Float;Ljava/lang/Float;I)I
+     */
+    JNIEXPORT jint JNICALL Java_com_jme3_bullet_objects_infos_RigidBodyMotionState_updateVelocityInfo
+      (JNIEnv * env, jobject object, jlong stateId, jobject linearVel, jobject angularVel, 
+            jobject linearImpulse, jobject angularImpulse, jobject totalForce, jobject totalTorque, 
+            jobject appliedLinearDamping, jobject appliedAngularDamping, jint lastUpdateId) {
+        jmeMotionState* motionState = reinterpret_cast<jmeMotionState*>(stateId);
+        if (motionState == NULL) {
+            jclass newExc = env->FindClass("java/lang/NullPointerException");
+            env->ThrowNew(newExc, "The native object does not exist.");
+            return lastUpdateId;
+        }
+        
+        if (lastUpdateId == motionState->getUpdateId()) {
+            return lastUpdateId;
+        }
+
+        jmeBulletUtil::convert(env, &motionState->getLinearVelocity(), linearVel);
+        jmeBulletUtil::convert(env, &motionState->getAngularVelocity(), angularVel);
+        jmeBulletUtil::convert(env, &motionState->getLinearImpulse(), linearImpulse);
+        jmeBulletUtil::convert(env, &motionState->getAngularImpulse(), angularImpulse);
+        jmeBulletUtil::convert(env, &motionState->getTotalForce(), totalForce);
+        jmeBulletUtil::convert(env, &motionState->getTotalTorque(), totalTorque);
+        //env->SetFloatField(object, jmeClasses::RigidBodyMotionState_appliedLinearDamping, motionState->getAppliedLinearDamping());
+        //env->SetFloatField(object, jmeClasses::RigidBodyMotionState_appliedAngularDamping, motionState->getAppliedAngularDamping());
+
+        return motionState->getUpdateId();
+    }
+
     /*
      * Class:     com_jme3_bullet_objects_infos_RigidBodyMotionState
      * Method:    finalizeNative
@@ -131,6 +165,23 @@ extern "C" {
             return;
         }
         delete(motionState);
+    }
+
+    /*
+     * Class:     com_jme3_bullet_objects_infos_RigidBodyMotionState
+     * Method:    setDebugCallback
+     * Signature: (JLcom/jme3/bullet/debug/BulletDebugCallback;)V
+     */
+    JNIEXPORT void JNICALL Java_com_jme3_bullet_objects_infos_RigidBodyMotionState_setDebugCallback
+      (JNIEnv *env, jobject object, jlong stateId, jobject callbackObject) {
+        jmeMotionState* motionState = reinterpret_cast<jmeMotionState*>(stateId);
+        if (motionState == NULL) {
+            jclass newExc = env->FindClass("java/lang/NullPointerException");
+            env->ThrowNew(newExc, "The native object does not exist.");
+            return;
+        }
+        jmeDebugCallback * callback = (callbackObject) ? new jmeDebugCallback(env, callbackObject, object) : 0;
+        motionState->setDebugCallback(callback);
     }
 
 #ifdef __cplusplus
