@@ -37,6 +37,23 @@ task libDist(dependsOn: subprojects.build) << {
     File libFolder = mkdir("$buildDir/libDist/lib")
     File sourceFolder = mkdir("$buildDir/libDist/sources")
     File javadocFolder = mkdir("$buildDir/libDist/javadoc")
+
+    // versionForJars and prefixForJars are defined in the root project gradle.properties file
+    String prefixTag
+    if(!project.hasProperty('prefixForJars')) {
+        prefixTag = ''
+    }
+    else {
+        prefixTag = prefixForJars
+    }
+    String versionTag
+    if(!project.hasProperty('versionForJars') || versionForJars == '') {
+        versionTag = ''
+    }
+    else {
+        versionTag = '-' + project.versionForJars
+    }
+
     subprojects.each {project ->
         if(project.ext.mainClass == ''){
             project.tasks.withType(Jar).each {archiveTask ->
@@ -44,19 +61,19 @@ task libDist(dependsOn: subprojects.build) << {
                     copy {
                         from archiveTask.archivePath
                         into sourceFolder
-                        rename {project.name + '-' + archiveTask.classifier +'.'+ archiveTask.extension}
+                        rename {prefixForJars + project.name + versionTag + '-' + archiveTask.classifier +'.'+ archiveTask.extension}
                     }
                 } else if(archiveTask.classifier == "javadoc"){
                     copy {
                         from archiveTask.archivePath
                         into javadocFolder
-                        rename {project.name + '-' + archiveTask.classifier +'.'+ archiveTask.extension}
+                        rename {prefixForJars + project.name + versionTag + '-' + archiveTask.classifier +'.'+ archiveTask.extension}
                     }
                 } else{
                     copy {
                         from archiveTask.archivePath
                         into libFolder
-                        rename {project.name + '.' + archiveTask.extension}
+                        rename {prefixForJars + project.name + versionTag + '.' + archiveTask.extension}
                     }
                 }
             }
@@ -129,7 +146,7 @@ ext {
 task configureAndroidNDK {
     def ndkBuildFile = "ndk-build"
     // if windows, use ndk-build.cmd instead
-    if (System.properties['os.name'].toLowerCase().contains('windows')) {
+    if (System.properties['os.name'].toLowerCase().contains('windows')) {ndkPath
         ndkBuildFile = "ndk-build.cmd"
     }
 
