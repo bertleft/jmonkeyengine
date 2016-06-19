@@ -31,6 +31,10 @@
  */
 package com.jme3.scene.shape;
 
+import com.jme3.export.InputCapsule;
+import com.jme3.export.JmeExporter;
+import com.jme3.export.JmeImporter;
+import com.jme3.export.OutputCapsule;
 import com.jme3.math.CurveAndSurfaceMath;
 import com.jme3.math.FastMath;
 import com.jme3.math.Spline.SplineType;
@@ -39,11 +43,14 @@ import com.jme3.math.Vector4f;
 import com.jme3.scene.Mesh;
 import com.jme3.scene.VertexBuffer;
 import com.jme3.util.BufferUtils;
+import java.io.IOException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * This class represents a surface described by knots, weights and control points.
@@ -59,6 +66,12 @@ public class Surface extends Mesh {
     private int                  basisVFunctionDegree; // the degree of basis V function
     private int                  uSegments;           // the amount of U segments
     private int                  vSegments;           // the amount of V segments
+
+    /**
+     * Serialization only - do not use.
+     */    
+    public Surface() {
+    }
 
     /**
      * Constructor. Constructs required surface.
@@ -377,4 +390,77 @@ public class Surface extends Mesh {
             }
         }
     }
+
+    @Override
+    public void read(JmeImporter e) throws IOException {
+        super.read(e);
+        InputCapsule capsule = e.getCapsule(this);
+        int intType = capsule.readInt("type", 0);
+        type = SplineType.values()[intType];
+        
+        // controlPoints
+        controlPoints = new ArrayList<>();
+        int controlPointsSize = capsule.readInt("controlPointsSize", 0);
+        for (int i = 0; i < controlPointsSize; ++i) {
+            ArrayList<Vector4f> controlPointArrayList = capsule.readSavableArrayList("controlPoints_" + i, null);
+            controlPoints.add(controlPointArrayList);
+        }
+        
+        // knots
+        int knotsLength = capsule.readInt("knotsLength", 0);
+        knots = new List[knotsLength];
+        for (int i = 0; i < knotsLength; ++i) {
+            float [] values = capsule.readFloatArray("knots_" + i, null);
+            ArrayList<Float> valuesList = new ArrayList<>();
+            knots[i] = valuesList;
+            if (values != null) {
+                for (float value : values) {
+                    valuesList.add(value);
+                }
+            }
+        }
+        
+        basisUFunctionDegree = capsule.readInt("basisUFunctionDegree", 0);
+        basisVFunctionDegree = capsule.readInt("basisVFunctionDegree", 0);
+        uSegments = capsule.readInt("uSegments", 0);
+        vSegments = capsule.readInt("vSegments", 0);
+    }
+
+    @Override
+    public void write(JmeExporter e) throws IOException {
+        super.write(e);
+        OutputCapsule capsule = e.getCapsule(this);
+        capsule.write(type.ordinal(), "type", 0);
+        
+        // controlPoints
+        capsule.write(controlPoints.size(), "controlPointsSize", 0);
+        for (int i = 0; i < controlPoints.size(); ++i) {
+            List<Vector4f> controlPointList = controlPoints.get(i);
+            ArrayList<Vector4f> controlPointArrayList;
+            if (controlPointList instanceof ArrayList) {
+                controlPointArrayList = (ArrayList<Vector4f>)controlPointList;
+            }
+            else {
+                controlPointArrayList = new ArrayList<>(controlPointList);
+            }
+            capsule.writeSavableArrayList(controlPointArrayList, "controlPoints_" + i, null);
+        }
+        
+        // knots
+        capsule.write(knots.length, "knotsLength", 0);
+        for (int i = 0; i < knots.length; ++i) {
+            List<Float> knotsList = knots[i];
+            float [] values = new float [knotsList.size()];
+            for (int j = 0; j < values.length; ++j) {
+                values[j] = knotsList.get(j);
+            }
+            capsule.write(values, "knots_" + i, null);
+        }
+
+        capsule.write(basisUFunctionDegree, "basisUFunctionDegree", 0);
+        capsule.write(basisVFunctionDegree, "basisVFunctionDegree", 0);
+        capsule.write(uSegments, "uSegments", 0);
+        capsule.write(vSegments, "vSegments", 0);
+    }
+   
 }
