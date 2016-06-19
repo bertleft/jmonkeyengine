@@ -8,6 +8,13 @@ apply plugin: 'maven'
 group = 'org.jmonkeyengine'
 version = jmePomVersion
 
+if (hasProperty('customJmeGroup')) {
+    group = customJmeGroup
+}
+if (!hasProperty('prefixForJars')) {
+    prefixForJars = ''
+}
+
 sourceCompatibility = '1.7'
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
@@ -31,8 +38,11 @@ dependencies {
 }
 
 jar {
+    if (prefixForJars != '') {
+        baseName = prefixForJars + baseName
+    }
     manifest {
-        attributes 'Implementation-Title': 'jMonkeyEngine',
+        attributes 'Implementation-Title': 'LBT-jMonkeyEngine',
                    'Implementation-Version': jmeFullVersion
     }
 }
@@ -40,9 +50,9 @@ jar {
 javadoc {
     failOnError = false
     options.memberLevel = org.gradle.external.javadoc.JavadocMemberLevel.PROTECTED
-    options.docTitle = "jMonkeyEngine ${jmeMainVersion} ${project.name} Javadoc"
-    options.windowTitle = "jMonkeyEngine ${jmeMainVersion} ${project.name} Javadoc"
-    options.header = "<b>jMonkeyEngine ${jmeMainVersion} ${project.name}</b>"
+    options.docTitle = "LBT jMonkeyEngine ${jmeMainVersion} ${project.name} Javadoc"
+    options.windowTitle = "LBT jMonkeyEngine ${jmeMainVersion} ${project.name} Javadoc"
+    options.header = "<b>LBT jMonkeyEngine ${jmeMainVersion} ${project.name}</b>"
     options.author = "true"
     options.use = "true"
     //disable doclint for JDK8, more quiet output
@@ -87,8 +97,8 @@ def pomConfig = {
     // from http://hub.jmonkeyengine.org/introduction/team/
     developers {
         developer {
-            name 'jMonkeyEngine Team'
-            id 'jMonkeyEngine'
+            name 'jMonkeyEngine Team, LeeboardTools'
+            id 'LBT-jMonkeyEngine'
         }
     }
 }
@@ -98,8 +108,12 @@ task writeFullPom {
     ext.pomFile = "$mavenPomDir/${project.name}-${project.version}.pom"
     outputs.file pomFile
     doLast {
+        String projectName = project.name
         pom {
             project pomConfig
+            if (prefixForJars != '') {
+                artifactId = prefixForJars + projectName
+            }
         }.writeTo(pomFile)
     }
 }
@@ -128,6 +142,9 @@ uploadArchives {
         }
         
         pom.project pomConfig
+        if (prefixForJars != '') {
+            pom.artifactId = prefixForJars + project.name
+        }
     }
 }
 

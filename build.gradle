@@ -38,7 +38,7 @@ task libDist(dependsOn: subprojects.build) << {
     File sourceFolder = mkdir("$buildDir/libDist/sources")
     File javadocFolder = mkdir("$buildDir/libDist/javadoc")
 
-    // versionForJars and prefixForJars are defined in the root project gradle.properties file
+    // prefixForJars and addVersionInLibDist are defined in the root project gradle.properties file
     String prefixTag
     if(!project.hasProperty('prefixForJars')) {
         prefixTag = ''
@@ -46,12 +46,13 @@ task libDist(dependsOn: subprojects.build) << {
     else {
         prefixTag = prefixForJars
     }
+
     String versionTag
-    if(!project.hasProperty('versionForJars') || versionForJars == '') {
+    if(!project.hasProperty('addVersionInLibDist') || !addVersionInLibDist) {
         versionTag = ''
     }
     else {
-        versionTag = '-' + project.versionForJars
+        versionTag = '-' + jmePomVersion
     }
 
     subprojects.each {project ->
