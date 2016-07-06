@@ -1646,4 +1646,41 @@ public class PhysicsSoftBody extends PhysicsCollisionObject implements Savable {
         }
 
     }
+
+
+    public int getNodeCount() {
+        return getNodeCount(objectId);
+    }
+    
+    private native int getNodeCount(long objectId);
+    
+    public Vector3f getNodePosition(int node, Vector3f store) {
+        if (store == null) {
+            store = new Vector3f();
+        }
+        getNodePosition(objectId, node, store);
+        return store;
+    }
+    
+    private native void getNodePosition(long objectId, int node, Vector3f store);
+    
+    public Vector3f getNodeVelocity(int node, Vector3f store) {
+        if (store == null) {
+            store = new Vector3f();
+        }
+        getNodeVelocity(objectId, node, store);
+        return store;
+    }
+    
+    private native void getNodeVelocity(long objectId, int node, Vector3f store);
+    
+    public Vector3f getNodeForceAccumulator(int node, Vector3f store) {
+        if (store == null) {
+            store = new Vector3f();
+        }
+        getNodeForceAccumulator(objectId, node, store);
+        return store;
+    }
+    
+    private native void getNodeForceAccumulator(long objectId, int node, Vector3f store);
 }
