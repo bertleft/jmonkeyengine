@@ -172,3 +172,23 @@ void jmeMotionState::forcesCleared() {
 
     jmeDebugCallback::callbackFromBullet(debugCallback, jmeDebugCallback::RIGID_BODY_FORCES_CLEARED, false);
 }
+
+void jmeMotionState::setTotalForce(const btVector3 & force)
+{
+    jmeDebugCallback::callbackFromBullet(debugCallback, jmeDebugCallback::RIGID_BODY_TOTAL_FORCE_UPDATED, true);
+    
+    ++updateId;
+    totalForce = force;
+    
+    jmeDebugCallback::callbackFromBullet(debugCallback, jmeDebugCallback::RIGID_BODY_TOTAL_FORCE_UPDATED, false);
+}
+
+void jmeMotionState::setTotalTorque(const btVector3 & torque)
+{
+    jmeDebugCallback::callbackFromBullet(debugCallback, jmeDebugCallback::RIGID_BODY_TOTAL_TORQUE_UPDATED, true);
+    
+    ++updateId;
+    totalTorque = torque;
+    
+    jmeDebugCallback::callbackFromBullet(debugCallback, jmeDebugCallback::RIGID_BODY_TOTAL_TORQUE_UPDATED, false);
+}

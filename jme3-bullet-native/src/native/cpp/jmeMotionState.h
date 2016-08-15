@@ -76,6 +76,8 @@ public:
     virtual void setLinearVelocity(const btVector3 & vel, const btVector3 * cause, btScalar tStep);
     virtual void setAngularVelocity(const btVector3 & vel, const btVector3 * cause, btScalar tStep);
     virtual void forcesCleared();
+    virtual void setTotalForce(const btVector3 & force);
+    virtual void setTotalTorque(const btVector3 & torque);
 
     const btVector3 & getLinearVelocity() const { return linearVel; }
     const btVector3 & getAngularVelocity() const { return angularVel; }

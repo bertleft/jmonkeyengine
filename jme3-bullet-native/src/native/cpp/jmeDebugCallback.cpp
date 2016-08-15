@@ -69,3 +69,5 @@ int jmeDebugCallback::RIGID_BODY_INTEGRATE_ANGULAR_VELOCITY             = 6;
 int jmeDebugCallback::RIGID_BODY_DAMP_LINEAR_VELOCITY                   = 7;
 int jmeDebugCallback::RIGID_BODY_DAMP_ANGULAR_VELOCITY                  = 8;
 int jmeDebugCallback::RIGID_BODY_FORCES_CLEARED                         = 9;
+int jmeDebugCallback::RIGID_BODY_TOTAL_FORCE_UPDATED                    = 10;
+int jmeDebugCallback::RIGID_BODY_TOTAL_TORQUE_UPDATED                   = 11;
